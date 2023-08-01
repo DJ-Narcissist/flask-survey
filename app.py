@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, url_for, flash
-from flask_debugtoolbar import DebugToolBarExtension
+from flask import Flask, render_template, redirect, url_for, flash, session
+from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
 app.config['new'] = '2534'
@@ -30,18 +30,30 @@ survey_questions = [
 def home():
     return render_template("home.html", title="Survey", instructions="Please answer the following questions:", button_text="Start Survey")
 
+@app.route('/initialize', methods=['POST'])
+def initialize_survey():
+    session[;responses] = []
+    return redirect(url_for('questions', step=0))
+
+
 @app.route('/questions/<int:step>', methods=['GET','POST'])
 def questions(step):
     total_questions = len(survey_questions)
 
-    if step >= total_questions or len(responses) == total_questions:
+    if step >= total_questions or len(session.get('responses', [])) == total_questions:
         return redirect(url_for('survey_completed'))
+
+    if step < 0 or step != len(session.get('responses', []))
+        flash ('You are trying to acess an invalid quesion.')
+        return redirect(url_for('questions', step= len(session.get('responses',[]))))
 
     if request.method =='POST':
         answer = request.form['answer']
+        responses = session.get('responses', [])
         responses.append(answer)
+        session['responses'] = responses
 
-    if step < 0 or step + 1 < len(survey_questions):
+    if step < 0 or step + 1 < total_questions:
         return redirect(url_for('questions', step=step + 1))
     else: 
         return redirect(url_for('survey_completed'))
