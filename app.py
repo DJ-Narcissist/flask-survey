@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
+from flask_debugtoolbar import DebugToolBarExtension
 
 app = Flask(__name__)
-
+app.config['new'] = '2534'
 # Initialize an empty list to store survey responses
 responses = []
 
@@ -31,11 +32,16 @@ def home():
 
 @app.route('/questions/<int:step>', methods=['GET','POST'])
 def questions(step):
+    total_questions = len(survey_questions)
+
+    if step >= total_questions or len(responses) == total_questions:
+        return redirect(url_for('survey_completed'))
+
     if request.method =='POST':
         answer = request.form['answer']
         responses.append(answer)
 
-    if step + 1 < len(survey_questions):
+    if step < 0 or step + 1 < len(survey_questions):
         return redirect(url_for('questions', step=step + 1))
     else: 
         return redirect(url_for('survey_completed'))
